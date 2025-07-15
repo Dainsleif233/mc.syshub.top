@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="GBK">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cf2mr</title>
+    <style>
+
+        .welcome-message {
+            font-size: 2.5em;
+            margin-bottom: 1em;
+        }
+
+        .drop-hint {
+            font-size: 1.5em;
+        }
+
+        .drag-overlay.active {
+            display: flex;
+        }
+
+        .drag-overlay {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            font-size: 2.5em;
+        }
+
+        * {
+            margin: 0;
+        }
+
+        body {
+            height: 100vh;
+        }
+
+        .container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .progress-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            font-size: 3em;
+        }
+
+        .progress-container.active {
+            display: flex;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        class CF2MR {
+            constructor() {
+                this.dragOverlay = document.getElementById('dragOverlay');
+                this.fileInput = document.getElementById('fileInput');
+                this.progressContainer = document.getElementById('progressContainer');
+
+                this.processed = 0;
+                this.total = 0;
+                this.dragCounter = 0;
+                this.isProcessing = false;
+
+                this.initEventListeners();
+            }
+
+            initEventListeners() {
+                document.addEventListener('dragenter', e => {
+                    e.preventDefault();
+                    this.dragCounter++;
+                    this.dragOverlay.classList.add('active');
+                });
+
+                document.addEventListener('dragleave', e => {
+                    e.preventDefault();
+                    this.dragCounter--;
+                    if (this.dragCounter === 0) {
+                        this.dragOverlay.classList.remove('active');
+                    }
+                });
+
+                document.addEventListener('dragover', e => e.preventDefault());
+
+                document.addEventListener('drop', e => {
+                    e.preventDefault();
+                    this.dragOverlay.classList.remove('active');
+
+                    const files = Array.from(e.dataTransfer.files);
+                    this.handleFile(files[0]);
+                    this.dragCounter = 0;
+                });
+
+                document.addEventListener('click', e => {
+                    if (!this.isProcessing &&
+                        !this.dragOverlay.classList.contains('active') &&
+                        !this.progressContainer.classList.contains('active')) {
+                        this.fileInput.click();
+                    }
+                });
+
+                this.fileInput.addEventListener('change', e => {
+                    const files = Array.from(e.target.files);
+                    this.handleFile(files[0]);
+                });
+            }
+
+            async handleFile(file) {
+                this.isProcessing = true;
+                this.progressContainer.classList.add('active');
+                const self = this;
+                JSZip.loadAsync(file).then(async (zip) => zip.file('manifest.json').async('uint8array').then(async (content) => {
+                    const manifest = JSON.parse(new TextDecoder().decode(content));
+                    const mrIndex = {};
+                    mrIndex.game = 'minecraft';
+                    mrIndex.formatVersion = 1;
+                    mrIndex.versionId = manifest.version;
+                    mrIndex.name = manifest.name;
+                    mrIndex.summary = `Author: ${manifest.author}`;
+                    mrIndex.dependencies = {};
+                    mrIndex.dependencies.minecraft = manifest.minecraft.version;
+
+                    if (manifest.minecraft.modLoaders[0].id.includes('fabric')) mrIndex.dependencies['fabric-loader'] = manifest.minecraft.modLoaders[0].id.replace('fabric-', '');
+                    else if (manifest.minecraft.modLoaders[0].id.includes('forge')) mrIndex.dependencies['forge'] = manifest.minecraft.modLoaders[0].id.replace('forge-', '');
+                    else if (manifest.minecraft.modLoaders[0].id.includes('neoforge')) mrIndex.dependencies['neoforge'] = manifest.minecraft.modLoaders[0].id.replace('neoforge-', '');
+                    else if (manifest.minecraft.modLoaders[0].id.includes('quilt')) mrIndex.dependencies['quilt-loader'] = manifest.minecraft.modLoaders[0].id.replace('quilt-', '');
+                    else throw new Error('Mod加载器错误');
+
+                    self.processed = 0;
+                    self.total = manifest.files.length;
+                    self.progressContainer.textContent = `0 / ${self.total}`
+                    const filePromises = manifest.files.map(async(file) => self.getFile(file));
+                    mrIndex.files = await Promise.all(filePromises);
+
+                    zip.file('modrinth.index.json', JSON.stringify(mrIndex, null, 2));
+                    zip.remove('manifest.json');
+
+                    return zip.generateAsync({type: 'blob'});
+                })).then(blob => {
+                    self.downloadFile(blob, file.name.replace(/\.[^/.]+$/, '.mrpack'));
+                    self.progressContainer.classList.remove('active');
+                    self.processed = 0;
+                    self.isProcessing = false;
+                    self.fileInput.value = '';
+                }).catch(e => {
+                    console.error(e);
+                    alert(e);
+                    self.progressContainer.classList.remove('active');
+                    self.processed = 0;
+                    self.isProcessing = false;
+                    self.fileInput.value = '';
+                });
+            }
+
+            async getFile(file) {
+                try {
+                    const mod = {};
+
+                    let modInfo;
+                    for (let i = 0; i < 3; i++) {
+                        const modInfoRes = await fetch(`https://proxy.syshub.top/https://mod.mcimirror.top/curseforge/v1/mods/${file.projectID}/files/${file.fileID}`);
+                        if (modInfoRes.ok) {
+                            modInfo = (await modInfoRes.json()).data;
+                            break;
+                        } else if (i == 2) {
+                            throw new Error(await modInfoRes.text());
+                        }
+                    }
+                    mod.fileSize = modInfo.fileLength;
+                    mod.downloads = [
+                        `https://mod.mcimirror.top/files/${Math.floor(file.fileID/1000)}/${file.fileID%1000}/${modInfo.fileName}`,
+                        `https://edge.forgecdn.net/files/${Math.floor(file.fileID/1000)}/${file.fileID%1000}/${modInfo.fileName}`,
+                        `https://mediafilez.forgecdn.net/files/${Math.floor(file.fileID/1000)}/${file.fileID%1000}/${modInfo.fileName}`
+                    ];
+                    mod.hashes = {
+                        "sha1": modInfo.hashes.find(hash => hash.algo === 1)?.value
+                    }
+
+                    let path;
+                    if (modInfo.fileName.endsWith(".jar")) path = 'mods';
+                    else if (modInfo.modules.findIndex(module => module.name === 'pack.mcmeta') !== -1) {
+                        if (modInfo.modules.findIndex(module => module.name === 'data') !== -1) path = 'datapacks';
+                        else path = 'resourcepacks';
+                    } else if (modInfo.modules.findIndex(module => module.name === 'shaders') !== -1) path = 'shaderpacks';
+                    else path = 'saves';
+                    mod.path = `${path}/${modInfo.fileName}`;
+
+                    console.log(`已获取: ${mod.path}`);
+                    this.progressContainer.textContent = `${++this.processed} / ${this.total}`
+                    return mod;
+                } catch (e) {
+                    console.error(`获取 ${file.fileID} 信息失败: ${e}`);
+                    alert(`获取 ${file.fileID} 信息失败: ${e}`);
+                    this.progressContainer.textContent = `${++this.processed} / ${this.total}`
+                    return null;
+                }
+            }
+
+            downloadFile(blob, filename) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new CF2MR();
+        });
+    </script>
+</head>
+<body>
+    <div class="drag-overlay" id="dragOverlay">释放整合包文件开始转换</div>
+
+    <div class="container">
+        <div class="welcome-message">Curseforge整合包 转 Modrinth整合包</div>
+
+        <div class="drop-hint">拖拽单个整合包文件到页面或点击页面选择整合包文件</div>
+
+        <input type="file" id="fileInput" class="file-input">
+
+        <div class="progress-container" id="progressContainer"></div>
+    </div>
+</body>
+</html>
