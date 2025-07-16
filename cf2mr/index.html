@@ -123,10 +123,11 @@
             }
 
             async handleFile(file) {
+                this.processed = 0;
                 this.isProcessing = true;
                 this.progressContainer.classList.add('active');
                 const self = this;
-                JSZip.loadAsync(file).then(async (zip) => zip.file('manifest.json').async('uint8array').then(async (content) => {
+                JSZip.loadAsync(file).then(async(zip) => zip.file('manifest.json').async('uint8array').then(async(content) => {
                     const manifest = JSON.parse(new TextDecoder().decode(content));
                     const mrIndex = {};
                     mrIndex.game = 'minecraft';
@@ -143,11 +144,10 @@
                     else if (manifest.minecraft.modLoaders[0].id.includes('quilt')) mrIndex.dependencies['quilt-loader'] = manifest.minecraft.modLoaders[0].id.replace('quilt-', '');
                     else throw new Error('Mod加载器错误');
 
-                    self.processed = 0;
                     self.total = manifest.files.length;
                     self.progressContainer.textContent = `0 / ${self.total}`
                     const filePromises = manifest.files.map(async(file) => self.getFile(file));
-                    mrIndex.files = await Promise.all(filePromises);
+                    mrIndex.files = (await Promise.all(filePromises)).filter(Boolean);
 
                     zip.file('modrinth.index.json', JSON.stringify(mrIndex, null, 2));
                     zip.remove('manifest.json');
@@ -203,12 +203,12 @@
                     mod.path = `${path}/${modInfo.fileName}`;
 
                     console.log(`已获取: ${mod.path}`);
-                    this.progressContainer.textContent = `${++this.processed} / ${this.total}`
+                    this.progressContainer.textContent = `${this.processed += 1} / ${this.total}`;
                     return mod;
                 } catch (e) {
                     console.error(`获取 ${file.fileID} 信息失败: ${e}`);
                     alert(`获取 ${file.fileID} 信息失败: ${e}`);
-                    this.progressContainer.textContent = `${++this.processed} / ${this.total}`
+                    this.progressContainer.textContent = `${this.processed += 1} / ${this.total}`;
                     return null;
                 }
             }
@@ -221,7 +221,7 @@
                 a.style.display = 'none';
                 document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
+                a.remove()
                 URL.revokeObjectURL(url);
             }
         }
