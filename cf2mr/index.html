@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="GBK">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>cf2mr</title>
     <style>
@@ -141,7 +141,7 @@
                     else if (manifest.minecraft.modLoaders[0].id.includes('forge')) mrIndex.dependencies['forge'] = manifest.minecraft.modLoaders[0].id.replace('forge-', '');
                     else if (manifest.minecraft.modLoaders[0].id.includes('neoforge')) mrIndex.dependencies['neoforge'] = manifest.minecraft.modLoaders[0].id.replace('neoforge-', '');
                     else if (manifest.minecraft.modLoaders[0].id.includes('quilt')) mrIndex.dependencies['quilt-loader'] = manifest.minecraft.modLoaders[0].id.replace('quilt-', '');
-                    else throw new Error('Mod¼ÓÔØÆ÷´íÎó');
+                    else throw new Error('ModåŠ è½½å™¨é”™è¯¯');
 
                     self.processed = 0;
                     self.total = manifest.files.length;
@@ -202,12 +202,12 @@
                     else path = 'saves';
                     mod.path = `${path}/${modInfo.fileName}`;
 
-                    console.log(`ÒÑ»ñÈ¡: ${mod.path}`);
+                    console.log(`å·²è·å–: ${mod.path}`);
                     this.progressContainer.textContent = `${++this.processed} / ${this.total}`
                     return mod;
                 } catch (e) {
-                    console.error(`»ñÈ¡ ${file.fileID} ĞÅÏ¢Ê§°Ü: ${e}`);
-                    alert(`»ñÈ¡ ${file.fileID} ĞÅÏ¢Ê§°Ü: ${e}`);
+                    console.error(`è·å– ${file.fileID} ä¿¡æ¯å¤±è´¥: ${e}`);
+                    alert(`è·å– ${file.fileID} ä¿¡æ¯å¤±è´¥: ${e}`);
                     this.progressContainer.textContent = `${++this.processed} / ${this.total}`
                     return null;
                 }
@@ -232,12 +232,12 @@
     </script>
 </head>
 <body>
-    <div class="drag-overlay" id="dragOverlay">ÊÍ·ÅÕûºÏ°üÎÄ¼ş¿ªÊ¼×ª»»</div>
+    <div class="drag-overlay" id="dragOverlay">é‡Šæ”¾æ•´åˆåŒ…æ–‡ä»¶å¼€å§‹è½¬æ¢</div>
 
     <div class="container">
-        <div class="welcome-message">CurseforgeÕûºÏ°ü ×ª ModrinthÕûºÏ°ü</div>
+        <div class="welcome-message">Curseforgeæ•´åˆåŒ… è½¬ Modrinthæ•´åˆåŒ…</div>
 
-        <div class="drop-hint">ÍÏ×§µ¥¸öÕûºÏ°üÎÄ¼şµ½Ò³Ãæ»òµã»÷Ò³ÃæÑ¡ÔñÕûºÏ°üÎÄ¼ş</div>
+        <div class="drop-hint">æ‹–æ‹½å•ä¸ªæ•´åˆåŒ…æ–‡ä»¶åˆ°é¡µé¢æˆ–ç‚¹å‡»é¡µé¢é€‰æ‹©æ•´åˆåŒ…æ–‡ä»¶</div>
 
         <input type="file" id="fileInput" class="file-input">
 
