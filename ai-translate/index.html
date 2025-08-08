@@ -369,7 +369,7 @@
         openModal('创建成功', body, [
           { text: '查看任务', onClick: () => {
               if (taskid) {
-                window.location.href = `task.html?id=${encodeURIComponent(taskid)}`;
+                window.location.href = `./task.html?id=${encodeURIComponent(taskid)}`;
               } else {
                 closeModal();
               }
