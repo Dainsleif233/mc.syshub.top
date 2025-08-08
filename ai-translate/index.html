@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI翻译服务</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="file"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-close {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .modal-btn-close:hover {
+            background: #d0d0d0;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .error-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI翻译服务</h1>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="apiUrl">API URL</label>
+                <input type="text" id="apiUrl" value="https://mc-api.syshub.top/ai-translate" required>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rememberUrl">
+                    <label for="rememberUrl">记住URL</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="apiKey">API Key</label>
+                <input type="password" id="apiKey" required autocomplete="off">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rememberKey">
+                    <label for="rememberKey">记住Key</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">使用说明</label>
+                <textarea id="description" readonly>欢迎使用AI翻译服务！
+
+使用步骤：
+1. 输入您的API密钥（如果没有，请联系管理员获取）
+2. 选择需要翻译的ZIP文件（支持Minecraft语言包格式）
+3. 点击提交按钮开始翻译任务
+4. 等待任务完成后即可下载翻译结果
+
+注意事项：
+- 文件大小限制为50MB
+- 仅支持ZIP格式的压缩包
+- 翻译过程可能需要几分钟，请耐心等待</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="fileInput">选择文件（仅限ZIP格式）</label>
+                <input type="file" id="fileInput" accept=".zip" required>
+            </div>
+
+            <button type="submit" class="submit-btn">提交任务</button>
+        </form>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">提示</div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-buttons" id="modalButtons"></div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时从Cookie中恢复数据
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUrl = getCookie('apiUrl');
+            const savedKey = getCookie('apiKey');
+            
+            if (savedUrl) {
+                document.getElementById('apiUrl').value = savedUrl;
+                document.getElementById('rememberUrl').checked = true;
+            }
+            
+            if (savedKey) {
+                document.getElementById('apiKey').value = savedKey;
+                document.getElementById('rememberKey').checked = true;
+            }
+        });
+
+        // Cookie操作函数
+        function setCookie(name, value, days = 30) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+        }
+
+        // 显示模态框
+        function showModal(title, message, buttons) {
+            const modal = document.getElementById('modal');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalBody = document.getElementById('modalBody');
+            const modalButtons = document.getElementById('modalButtons');
+            
+            modalHeader.textContent = title;
+            modalBody.innerHTML = message;
+            modalButtons.innerHTML = '';
+            
+            buttons.forEach(button => {
+                const btn = document.createElement('button');
+                btn.className = `modal-btn ${button.class}`;
+                btn.textContent = button.text;
+                btn.onclick = button.onClick;
+                modalButtons.appendChild(btn);
+            });
+            
+            modal.style.display = 'flex';
+        }
+
+        function hideModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // 表单提交处理
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const apiUrl = document.getElementById('apiUrl').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('请选择一个文件');
+                return;
+            }
+            
+            // 保存到Cookie
+            if (document.getElementById('rememberUrl').checked) {
+                setCookie('apiUrl', apiUrl);
+            } else {
+                deleteCookie('apiUrl');
+            }
+            
+            if (document.getElementById('rememberKey').checked) {
+                setCookie('apiKey', apiKey);
+            } else {
+                deleteCookie('apiKey');
+            }
+            
+            // 准备表单数据
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': apiKey
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.status !== 200) {
+                    // 获取issues链接
+                    const linkHeader = response.headers.get('Link');
+                    let issuesUrl = 'https://github.com/Dainsleif233/api-issues/issues';
+                    
+                    if (linkHeader) {
+                        const match = linkHeader.match(/<([^>]+)>;\s*rel="issues"/);
+                        if (match) {
+                            issuesUrl = match[1];
+                        }
+                    }
+                    
+                    showModal('错误', 
+                        `<p><strong>错误信息：</strong>${data.error || '未知错误'}</p>
+                        <p style="margin-top: 15px;">请检查您的输入是否正确并重试。如果问题持续存在，您可以：</p>
+                        <ul style="margin-top: 10px;">
+                            <li><a href="${issuesUrl}" target="_blank" class="error-link">提交Issue反馈问题</a></li>
+                            <li>联系站长：<a href="mailto:dainsleif@yeah.net" class="error-link">dainsleif@yeah.net</a></li>
+                        </ul>`,
+                        [
+                            { text: '关闭', class: 'modal-btn-close', onClick: hideModal }
+                        ]
+                    );
+                } else {
+                    showModal('成功',
+                        `<p><strong>消息：</strong>${data.message}</p>
+                        <p style="margin-top: 10px;"><strong>任务ID：</strong>${data.taskid}</p>`,
+                        [
+                            { text: '关闭', class: 'modal-btn-close', onClick: hideModal },
+                            { 
+                                text: '查看任务', 
+                                class: 'modal-btn-primary', 
+                                onClick: () => {
+                                    window.location.href = `task.html?id=${data.taskid}`;
+                                }
+                            }
+                        ]
+                    );
+                }
+            } catch (error) {
+                showModal('错误',
+                    `<p><strong>网络错误：</strong>${error.message}</p>
+                    <p style="margin-top: 15px;">请检查网络连接并重试。</p>`,
+                    [
+                        { text: '关闭', class: 'modal-btn-close', onClick: hideModal }
+                    ]
+                );
+            }
+        });
+    </script>
+</body>
+</html>

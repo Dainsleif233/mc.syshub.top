@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务状态</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .task-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .task-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .task-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-table th,
+        .task-table td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        .task-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .task-table td {
+            background: white;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .task-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-extracting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-translating {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-packing {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-timeout {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn.refresh {
+            background: linear-gradient(135deg, #56ccf2 0%, #2f80ed 100%);
+        }
+
+        .namespace-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .namespace-tag {
+            background: #e0e0e0;
+            color: #333;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>任务状态查询</h1>
+        
+        <div class="form-group">
+            <label for="apiUrl">API URL</label>
+            <input type="text" id="apiUrl" value="https://mc-api.syshub.top/ai-translate" required>
+            <div class="checkbox-group">
+                <input type="checkbox" id="rememberUrl">
+                <label for="rememberUrl">记住URL</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="apiKey">API Key</label>
+            <input type="password" id="apiKey" required autocomplete="off">
+            <div class="checkbox-group">
+                <input type="checkbox" id="rememberKey">
+                <label for="rememberKey">记住Key</label>
+            </div>
+        </div>
+
+        <div id="taskInfo" class="task-info">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <script>
+        let taskId = null;
+        let taskData = null;
+
+        // Cookie操作函数
+        function setCookie(name, value, days = 30) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+        }
+
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 获取状态文本和样式
+        function getStatusInfo(status, createdAt) {
+            const now = Math.floor(Date.now() / 1000);
+            const timeDiff = now - createdAt;
+            
+            if (status !== 0 && timeDiff > 300) {
+                return { text: '超时', class: 'status-timeout' };
+            }
+            
+            switch (status) {
+                case 0:
+                    return { text: '完成', class: 'status-completed' };
+                case 1:
+                    return { text: '提取词条中', class: 'status-extracting' };
+                case 2:
+                    return { text: '翻译中', class: 'status-translating' };
+                case 3:
+                    return { text: '打包中', class: 'status-packing' };
+                default:
+                    return { text: '未知', class: 'status-badge' };
+            }
+        }
+
+        // 渲染命名空间
+        function renderNamespaces(namespaces) {
+            if (!namespaces || namespaces.length === 0) {
+                return '-';
+            }
+            return `<div class="namespace-list">
+                ${namespaces.map(ns => `<span class="namespace-tag">${ns}</span>`).join('')}
+            </div>`;
+        }
+
+        // 加载任务信息
+        async function loadTaskInfo() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const apiKey = document.getElementById('apiKey').value;
+            
+            if (!apiUrl || !apiKey) {
+                document.getElementById('taskInfo').innerHTML = 
+                    '<div class="error-message">请填写API URL和API Key</div>';
+                return;
+            }
+            
+            // 保存到Cookie
+            if (document.getElementById('rememberUrl').checked) {
+                setCookie('apiUrl', apiUrl);
+            } else {
+                deleteCookie('apiUrl');
+            }
+            
+            if (document.getElementById('rememberKey').checked) {
+                setCookie('apiKey', apiKey);
+            } else {
+                deleteCookie('apiKey');
+            }
+            
+            try {
+                const response = await fetch(`${apiUrl}/${taskId}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                taskData = await response.json();
+                
+                const statusInfo = getStatusInfo(taskData.status, taskData.created_at);
+                const showNamespaces = taskData.status >= 1;
+                const showStrings = taskData.status >= 2 || taskData.status === 0;
+                
+                let html = `
+                    <div class="task-title">任务ID: ${taskData.id}</div>
+                    <table class="task-table">
+                        <thead>
+                            <tr>
+                                <th>状态</th>
+                                <th>命名空间</th>
+                                <th>词条数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="status-badge ${statusInfo.class}">${statusInfo.text}</span></td>
+                                <td>${showNamespaces ? renderNamespaces(taskData.namespaces) : '-'}</td>
+                                <td>${showStrings ? taskData.strings : '-'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                `;
+                
+                if (taskData.status === 0) {
+                    html += `<button class="action-btn" onclick="downloadResult()">下载文件</button>`;
+                } else {
+                    html += `<button class="action-btn refresh" onclick="location.reload()">刷新</button>`;
+                }
+                
+                document.getElementById('taskInfo').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('taskInfo').innerHTML = 
+                    `<div class="error-message">加载失败：${error.message}</div>
+                     <button class="action-btn refresh" onclick="location.reload()">重试</button>`;
+            }
+        }
+
+        // 下载结果
+        function downloadResult() {
+            if (taskData && taskData.result) {
+                window.location.href = `https://lanzout.com/${taskData.result}`;
+            }
+        }
+
+        // 页面加载时执行
+        window.addEventListener('DOMContentLoaded', function() {
+            // 获取任务ID
+            taskId = getUrlParameter('id');
+            if (!taskId) {
+                document.getElementById('taskInfo').innerHTML = 
+                    '<div class="error-message">未提供任务ID</div>';
+                return;
+            }
+            
+            // 从Cookie中恢复数据
+            const savedUrl = getCookie('apiUrl');
+            const savedKey = getCookie('apiKey');
+            
+            if (savedUrl) {
+                document.getElementById('apiUrl').value = savedUrl;
+                document.getElementById('rememberUrl').checked = true;
+            }
+            
+            if (savedKey) {
+                document.getElementById('apiKey').value = savedKey;
+                document.getElementById('rememberKey').checked = true;
+            }
+            
+            // 如果有保存的凭据，自动加载任务信息
+            if (savedUrl && savedKey) {
+                loadTaskInfo();
+            } else {
+                document.getElementById('taskInfo').innerHTML = 
+                    '<div class="error-message">请填写API URL和API Key后查询任务状态</div>';
+            }
+        });
+
+        // 监听输入变化
+        document.getElementById('apiUrl').addEventListener('change', loadTaskInfo);
+        document.getElementById('apiKey').addEventListener('change', loadTaskInfo);
+        document.getElementById('rememberUrl').addEventListener('change', function() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            if (this.checked) {
+                setCookie('apiUrl', apiUrl);
+            } else {
+                deleteCookie('apiUrl');
+            }
+        });
+        document.getElementById('rememberKey').addEventListener('change', function() {
+            const apiKey = document.getElementById('apiKey').value;
+            if (this.checked) {
+                setCookie('apiKey', apiKey);
+            } else {
+                deleteCookie('apiKey');
+            }
+        });
+    </script>
+</body>
+</html>
