@@ -1,410 +1,395 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI翻译服务</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Translate - 创建任务</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #0b1220;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --primary: #3b82f6;
+      --primary-2: #2563eb;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --border: #1f2937;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 20% -10%, #1e293b 0%, transparent 70%),
+                  radial-gradient(1200px 600px at 120% 0%, #0b1220 0%, #0b1220 60%);
+    }
+    .container{
+      max-width: 880px;
+      margin: 48px auto;
+      padding: 0 16px;
+    }
+    .card{
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-head{
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .title{font-size:20px;font-weight:700;letter-spacing:.3px}
+    .sub{color:var(--muted);font-size:13px}
+    .card-body{padding: 20px 24px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+    }
+    @media (min-width: 720px){
+      .grid-2{grid-template-columns: 1fr 1fr;}
+    }
+    label{display:block;font-weight:600;margin-bottom:8px}
+    .row{
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 14px 10px;
+    }
+    input[type="text"], input[type="password"], textarea{
+      width:100%;
+      padding:12px 12px;
+      background:#0b1020;
+      border:1px solid #182034;
+      border-radius:8px;
+      color:var(--text);
+      outline:none;
+      transition:.2s border-color, .2s box-shadow;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, textarea:focus{
+      border-color:#355399; box-shadow:0 0 0 3px rgba(53,83,153,.2)
+    }
+    textarea{min-height:120px; resize:vertical; white-space:pre-wrap}
+    .checkbox{
+      display:flex; align-items:center; gap:8px; margin-top:8px; color:var(--muted); font-size:14px
+    }
+    .file{
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    }
+    input[type="file"]{
+      color:var(--muted);
+      padding:10px;
+      background:#0b1020;
+      border:1px dashed #2a3554;
+      border-radius:8px;
+    }
+    .actions{
+      display:flex; gap:12px; margin-top:8px; flex-wrap:wrap
+    }
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      background: var(--primary);
+      color:#fff; padding:12px 16px; border-radius:10px; font-weight:700;
+      box-shadow: 0 10px 20px rgba(37,99,235,.25);
+      transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover{ background: var(--primary-2) }
+    .btn:active{ transform: translateY(1px) }
+    .btn.secondary{
+      background: transparent; color: var(--text);
+      border:1px solid #2a3554;
+      box-shadow:none;
+    }
+    .hint{color:var(--muted); font-size:13px}
+    details{
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#0b1020;
+      padding:10px 12px;
+    }
+    summary{cursor:pointer; font-weight:600}
+    .chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+    .chip{background:#172039;border:1px solid #2a3554;color:#c7d2fe;padding:4px 8px;border-radius:999px;font-size:12px}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-            text-align: center;
-            font-size: 28px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        input[type="file"],
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus,
-        input[type="file"]:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-            font-family: inherit;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            margin-top: 8px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            margin-right: 8px;
-        }
-
-        .checkbox-group label {
-            margin-bottom: 0;
-            font-weight: normal;
-            cursor: pointer;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .modal-body {
-            margin-bottom: 20px;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .modal-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .modal-btn-close {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .modal-btn-close:hover {
-            background: #d0d0d0;
-        }
-
-        .modal-btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .modal-btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .error-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .error-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+    /* Modal */
+    .modal {
+      position: fixed; inset: 0;
+      background: rgba(10, 15, 25, .6);
+      backdrop-filter: blur(4px);
+      display:none; align-items:center; justify-content:center; z-index:9999;
+      padding: 20px;
+    }
+    .modal.show{display:flex}
+    .dialog{
+      width:min(560px, 96vw);
+      background: linear-gradient(180deg, #0f1526 0%, #0b1020 100%);
+      border:1px solid var(--border);
+      border-radius:14px; box-shadow:var(--shadow); overflow:hidden
+    }
+    .dialog-head{padding:14px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center}
+    .dialog-title{font-weight:700}
+    .dialog-body{padding:16px 18px; color:var(--text); line-height:1.6}
+    .dialog-foot{padding:12px 18px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap}
+    .close-x{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:20px}
+    .spinner{
+      width:20px;height:20px;border:3px solid #2a3554;border-top-color:#3b82f6;border-radius:50%;display:inline-block;animation:spin .9s linear infinite;vertical-align:-4px;margin-right:8px
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    code{background:#0b1020;border:1px solid #182034;color:#cbd5e1;padding:2px 6px;border-radius:6px}
+    a.link{color:#93c5fd}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>AI翻译服务</h1>
-        <form id="uploadForm">
-            <div class="form-group">
-                <label for="apiUrl">API URL</label>
-                <input type="text" id="apiUrl" value="https://mc-api.syshub.top/ai-translate" required>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="rememberUrl">
-                    <label for="rememberUrl">记住URL</label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="apiKey">API Key</label>
-                <input type="password" id="apiKey" required autocomplete="off">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="rememberKey">
-                    <label for="rememberKey">记住Key</label>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="description">使用说明</label>
-                <textarea id="description" readonly>欢迎使用AI翻译服务！
-
-使用步骤：
-1. 输入您的API密钥（如果没有，请联系管理员获取）
-2. 选择需要翻译的ZIP文件（支持Minecraft语言包格式）
-3. 点击提交按钮开始翻译任务
-4. 等待任务完成后即可下载翻译结果
-
-注意事项：
-- 文件大小限制为50MB
-- 仅支持ZIP格式的压缩包
-- 翻译过程可能需要几分钟，请耐心等待</textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="fileInput">选择文件（仅限ZIP格式）</label>
-                <input type="file" id="fileInput" accept=".zip" required>
-            </div>
-
-            <button type="submit" class="submit-btn">提交任务</button>
-        </form>
-    </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header" id="modalHeader">提示</div>
-            <div class="modal-body" id="modalBody"></div>
-            <div class="modal-buttons" id="modalButtons"></div>
+  <div class="container">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="title">AI Translate · 创建任务</div>
+          <div class="sub">上传 zip 包，创建翻译任务</div>
         </div>
+      </div>
+      <div class="card-body">
+        <form id="taskForm" autocomplete="off">
+          <div class="grid grid-2">
+            <div class="row">
+              <label for="apiUrl">API URL</label>
+              <input type="text" id="apiUrl" name="api-url" placeholder="https://example.com/ai-translate" value="https://mc-api.syshub.top/ai-translate" />
+              <div class="checkbox">
+                <input type="checkbox" id="rememberUrl" />
+                <label for="rememberUrl" style="margin:0; font-weight:500;">记住 URL</label>
+              </div>
+              <div class="hint">默认值可用，若你自建了服务可替换。</div>
+            </div>
+
+            <div class="row">
+              <label for="apiKey">API Key</label>
+              <input type="password" id="apiKey" name="api-key" placeholder="在此输入 API Key" autocomplete="new-password" />
+              <div class="checkbox">
+                <input type="checkbox" id="rememberKey" />
+                <label for="rememberKey" style="margin:0; font-weight:500;">记住 Key</label>
+              </div>
+              <div class="hint">为保护安全，默认不保存到浏览器，勾选后将写入站点 Cookie。</div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:16px">
+            <label>使用说明</label>
+            <details>
+              <summary>展开/收起</summary>
+              <div style="margin-top:8px; color:#bcc5d3; font-size:14px; line-height:1.7">
+                • 支持上传一个 .zip 文件，内部包含需要提取与翻译的资源文件。<br/>
+                • 创建成功后会返回 taskid，可在“查看任务”页查看实时状态。<br/>
+                • 如遇错误，请先核对 API URL 与 Key，并稍后重试。<br/>
+                • 多次重试仍失败，可使用返回的 issue 链接反馈，或联系站长：<code>dainsleif@yeah.net</code>。
+              </div>
+            </details>
+          </div>
+
+          <div class="row" style="margin-top:16px">
+            <label for="zipFile">选择 zip 文件</label>
+            <div class="file">
+              <input type="file" id="zipFile" accept=".zip,application/zip" />
+              <span class="hint">仅支持单个 .zip 文件</span>
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top:16px">
+            <button type="submit" class="btn" id="submitBtn">提交</button>
+            <span class="hint">提交后将在弹窗中显示结果与 taskid</span>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // 页面加载时从Cookie中恢复数据
-        window.addEventListener('DOMContentLoaded', function() {
-            const savedUrl = getCookie('apiUrl');
-            const savedKey = getCookie('apiKey');
-            
-            if (savedUrl) {
-                document.getElementById('apiUrl').value = savedUrl;
-                document.getElementById('rememberUrl').checked = true;
-            }
-            
-            if (savedKey) {
-                document.getElementById('apiKey').value = savedKey;
-                document.getElementById('rememberKey').checked = true;
-            }
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div class="dialog-title" id="modalTitle">提示</div>
+        <button class="close-x" id="modalCloseX" aria-label="关闭">×</button>
+      </div>
+      <div class="dialog-body" id="modalBody"></div>
+      <div class="dialog-foot" id="modalFoot"></div>
+    </div>
+  </div>
+
+  <script>
+    // Cookie helpers
+    function setCookie(name, value, days) {
+      const expires = new Date(Date.now() + days*864e5).toUTCString();
+      document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) +
+        "; expires=" + expires + "; path=/ai-translate/; SameSite=Lax";
+    }
+    function getCookie(name) {
+      const m = document.cookie.match(new RegExp('(?:^|; )' + encodeURIComponent(name).replace(/[-.+*]/g, '\\$&') + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+    function deleteCookie(name) {
+      document.cookie = encodeURIComponent(name) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/ai-translate/; SameSite=Lax";
+    }
+
+    // Modal helpers
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalFoot = document.getElementById('modalFoot');
+    document.getElementById('modalCloseX').addEventListener('click', closeModal);
+    function openModal(title, html, buttons = []) {
+      modalTitle.textContent = title || '提示';
+      modalBody.innerHTML = html || '';
+      modalFoot.innerHTML = '';
+      for (const btn of buttons) {
+        const b = document.createElement('button');
+        b.className = 'btn ' + (btn.variant === 'secondary' ? 'secondary' : '');
+        b.textContent = btn.text;
+        b.addEventListener('click', btn.onClick || closeModal);
+        modalFoot.appendChild(b);
+      }
+      modal.classList.add('show');
+    }
+    function closeModal(){ modal.classList.remove('show') }
+    function showLoading(text){
+      openModal('请稍候', `<span class="spinner"></span>${text || '加载中...'}`, [
+        { text: '取消', variant: 'secondary', onClick: closeModal }
+      ]);
+    }
+
+    // Parse Link header, prefer rel="issues"
+    function parseIssuesLink(linkHeader) {
+      if (!linkHeader) return null;
+      try {
+        const parts = linkHeader.split(',');
+        let firstUrl = null;
+        for (const part of parts) {
+          const seg = part.trim().split(';').map(s => s.trim());
+          const urlMatch = seg[0].match(/<([^>]+)>/);
+          const relMatch = seg.slice(1).join(';').match(/rel="?([^"]+)"?/i);
+          const url = urlMatch ? urlMatch[1] : null;
+          if (!firstUrl && url) firstUrl = url;
+          if (relMatch && relMatch[1] && relMatch[1].includes('issues') && url) return url;
+        }
+        return firstUrl;
+      } catch { return null; }
+    }
+
+    // Init from cookies
+    const apiUrlInput = document.getElementById('apiUrl');
+    const apiKeyInput = document.getElementById('apiKey');
+    const rememberUrl = document.getElementById('rememberUrl');
+    const rememberKey = document.getElementById('rememberKey');
+
+    (function restoreFromCookies(){
+      const cu = getCookie('ai_url');
+      const ck = getCookie('ai_key');
+      if (cu) { apiUrlInput.value = cu; rememberUrl.checked = true; }
+      if (ck) { apiKeyInput.value = ck; rememberKey.checked = true; }
+    })();
+
+    // Submit handler
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const apiUrl = (apiUrlInput.value || '').trim();
+      const apiKey = (apiKeyInput.value || '').trim();
+      const fileInput = document.getElementById('zipFile');
+      const file = fileInput.files && fileInput.files[0];
+
+      if (!apiUrl) {
+        openModal('提示', '请填写 API URL。', [{ text: '关闭', variant: 'secondary' }]);
+        return;
+      }
+      if (!apiKey) {
+        openModal('提示', '请填写 API Key。', [{ text: '关闭', variant: 'secondary' }]);
+        return;
+      }
+      if (!file) {
+        openModal('提示', '请选择一个 zip 文件后再提交。', [{ text: '关闭', variant: 'secondary' }]);
+        return;
+      }
+      if (!/\.zip$/i.test(file.name)) {
+        openModal('提示', '仅支持 .zip 文件，请重新选择。', [{ text: '关闭', variant: 'secondary' }]);
+        return;
+      }
+
+      // Cookies on demand
+      try {
+        if (rememberUrl.checked) setCookie('ai_url', apiUrl, 30);
+        else deleteCookie('ai_url');
+
+        if (rememberKey.checked) setCookie('ai_key', apiKey, 30);
+        else deleteCookie('ai_key');
+      } catch {/* ignore cookie errors */}
+
+      showLoading('正在创建任务...');
+
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'X-Api-Key': apiKey },
+          body: fd,
         });
 
-        // Cookie操作函数
-        function setCookie(name, value, days = 30) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
-            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+        const issuesLink = parseIssuesLink(res.headers.get('Link'));
+        let data = null;
+        try { data = await res.json(); } catch { data = {}; }
+
+        if (res.status !== 200) {
+          const errMsg = (data && (data.error || data.message)) || `请求失败（HTTP ${res.status}）`;
+          const prettyNote = `请先查看上方说明并尝试重试；如果多次重试仍失败，可以通过响应头提供的 issue 链接提交反馈，或联系站长：<code>dainsleif@yeah.net</code>。`;
+          const body = `
+            <div style="color:#fecaca; margin-bottom:8px">错误：${escapeHtml(errMsg)}</div>
+            <div class="hint" style="line-height:1.7">${prettyNote}</div>
+          `;
+          const buttons = [
+            ...(issuesLink ? [{ text: '前往 issue', onClick: () => { window.open(issuesLink, '_blank'); } }] : []),
+            { text: '关闭', variant: 'secondary', onClick: closeModal }
+          ];
+          openModal('创建失败', body, buttons);
+          return;
         }
 
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+        // Success
+        const message = (data && data.message) || '成功';
+        const taskid = data && data.taskid;
+        const body = `
+          <div style="margin-bottom:8px">服务器返回：<strong>${escapeHtml(message)}</strong></div>
+          <div>任务 ID：<code>${escapeHtml(taskid || '(未返回)')}</code></div>
+        `;
+        openModal('创建成功', body, [
+          { text: '查看任务', onClick: () => {
+              if (taskid) {
+                window.location.href = `task.html?id=${encodeURIComponent(taskid)}`;
+              } else {
+                closeModal();
+              }
             }
-            return null;
-        }
+          },
+          { text: '关闭', variant: 'secondary', onClick: closeModal }
+        ]);
 
-        function deleteCookie(name) {
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
-        }
+      } catch (err) {
+        const body = `
+          <div style="color:#fecaca; margin-bottom:8px">网络异常：${escapeHtml(err.message || String(err))}</div>
+          <div class="hint">请检查网络或稍后重试。</div>
+        `;
+        openModal('请求出错', body, [{ text: '关闭', variant: 'secondary', onClick: closeModal }]);
+      }
+    });
 
-        // 显示模态框
-        function showModal(title, message, buttons) {
-            const modal = document.getElementById('modal');
-            const modalHeader = document.getElementById('modalHeader');
-            const modalBody = document.getElementById('modalBody');
-            const modalButtons = document.getElementById('modalButtons');
-            
-            modalHeader.textContent = title;
-            modalBody.innerHTML = message;
-            modalButtons.innerHTML = '';
-            
-            buttons.forEach(button => {
-                const btn = document.createElement('button');
-                btn.className = `modal-btn ${button.class}`;
-                btn.textContent = button.text;
-                btn.onclick = button.onClick;
-                modalButtons.appendChild(btn);
-            });
-            
-            modal.style.display = 'flex';
-        }
-
-        function hideModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        // 表单提交处理
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const apiUrl = document.getElementById('apiUrl').value;
-            const apiKey = document.getElementById('apiKey').value;
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            
-            if (!file) {
-                alert('请选择一个文件');
-                return;
-            }
-            
-            // 保存到Cookie
-            if (document.getElementById('rememberUrl').checked) {
-                setCookie('apiUrl', apiUrl);
-            } else {
-                deleteCookie('apiUrl');
-            }
-            
-            if (document.getElementById('rememberKey').checked) {
-                setCookie('apiKey', apiKey);
-            } else {
-                deleteCookie('apiKey');
-            }
-            
-            // 准备表单数据
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-API-Key': apiKey
-                    },
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                if (response.status !== 200) {
-                    // 获取issues链接
-                    const linkHeader = response.headers.get('Link');
-                    let issuesUrl = 'https://github.com/Dainsleif233/api-issues/issues';
-                    
-                    if (linkHeader) {
-                        const match = linkHeader.match(/<([^>]+)>;\s*rel="issues"/);
-                        if (match) {
-                            issuesUrl = match[1];
-                        }
-                    }
-                    
-                    showModal('错误', 
-                        `<p><strong>错误信息：</strong>${data.error || '未知错误'}</p>
-                        <p style="margin-top: 15px;">请检查您的输入是否正确并重试。如果问题持续存在，您可以：</p>
-                        <ul style="margin-top: 10px;">
-                            <li><a href="${issuesUrl}" target="_blank" class="error-link">提交Issue反馈问题</a></li>
-                            <li>联系站长：<a href="mailto:dainsleif@yeah.net" class="error-link">dainsleif@yeah.net</a></li>
-                        </ul>`,
-                        [
-                            { text: '关闭', class: 'modal-btn-close', onClick: hideModal }
-                        ]
-                    );
-                } else {
-                    showModal('成功',
-                        `<p><strong>消息：</strong>${data.message}</p>
-                        <p style="margin-top: 10px;"><strong>任务ID：</strong>${data.taskid}</p>`,
-                        [
-                            { text: '关闭', class: 'modal-btn-close', onClick: hideModal },
-                            { 
-                                text: '查看任务', 
-                                class: 'modal-btn-primary', 
-                                onClick: () => {
-                                    window.location.href = `task.html?id=${data.taskid}`;
-                                }
-                            }
-                        ]
-                    );
-                }
-            } catch (error) {
-                showModal('错误',
-                    `<p><strong>网络错误：</strong>${error.message}</p>
-                    <p style="margin-top: 15px;">请检查网络连接并重试。</p>`,
-                    [
-                        { text: '关闭', class: 'modal-btn-close', onClick: hideModal }
-                    ]
-                );
-            }
-        });
-    </script>
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+  </script>
 </body>
 </html>
