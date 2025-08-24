@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>SysHub Schematic Cloud</title>
+        <meta name="description" content="上传 schem 到云端">
+        <link rel="prefetch" as="image" type="image/svg+xml" href="https://pic1.imgdb.cn/item/68a5acfd58cb8da5c83e9d04.svg">
+        <link rel="stylesheet" type="text/css" href="assets/index.css">
+        <script type="module" src="assets/download.js"></script>
+        <style>
+            body {
+                background-image: url(https://pic1.imgdb.cn/item/6725c853d29ded1a8c67b1d8.webp);
+                background-position: 50%;
+                background-size: cover;
+                min-height: 100vh
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card">
+                <div class="card-body">
+                    <a href="." class="center">
+                        <img src="https://pic1.imgdb.cn/item/68a5acfd58cb8da5c83e9d04.svg" alt="schematic.cloud">
+                    </a>
+                    <div class="file-downloader">
+                        <p>请输入下载 key 获取 schem 文件: </p>
+                        <div class="center">
+                            <input id="keyInput" tabindex="-1" placeholder="粘贴下载 key">
+                            <button class="return" id="file-download">下载</button>
+                        </div>
+                        <p>
+                            点击这里 <a href="index.html">上传</a>
+                            或 <a href="delete.html">删除</a>
+                            schem文件 
+                        </p>
+                    </div>
+                    <div class="file-downloaded hidden">
+                        <div class="center">
+                            <img src="https://pic1.imgdb.cn/item/68aaa43958cb8da5c8477605.svg" width="55px">
+                            <p>文件下载成功</p>
+                            <button class="return" id="return"> 上传其他文件 </button>
+                        </div>
+                    </div>
+                    <div class="file-down-failed hidden">
+                        <div class="center">
+                            <img src="https://pic1.imgdb.cn/item/68aaa53958cb8da5c8477624.svg" width="55px">
+                            <p id="errorText"></p>
+                            <button class="return" id="return"> 上传其他文件 </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <p class="center">
+                        Powered by <a href="https://github.com/Dainsleif233/Arkitektonika" target="_blank">SysHub API</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <script type="module" src="assets/entry.js" crossorigin></script>
+    </body>
+</html>
