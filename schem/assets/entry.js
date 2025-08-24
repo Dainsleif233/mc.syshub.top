@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    const response = fetch('./assets/config.json')
+    const response = fetch('/schem/assets/config.json')
         .then(response => {
             if (!response.ok)
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -10,14 +10,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if ((new URLSearchParams(window.location.search).has('key')) &&
             document.getElementById('file-download') !== null) {
-        const download = await import('./download.js');
+        const download = await import('/schem/assets/download.js');
         await response;
         download.handleDownload((new URLSearchParams(window.location.search).get('key')));
     }
 
     if ((new URLSearchParams(window.location.search).has('key')) &&
             document.getElementById('file-delete') !== null) {
-        const deleteJs = await import('./delete.js');
+        const deleteJs = await import('/schem/assets/delete.js');
         await response;
         deleteJs.handleDelete((new URLSearchParams(window.location.search).get('key')));
     }
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 if (document.getElementById('fileInput') !== null)
     document.getElementById('fileInput').addEventListener('change', async e => {
         const files = Array.from(e.target.files);
-        const index = await import('./index.js');
+        const index = await import('/schem/assets/index.js');
         await index.handleFile(files[0]);
         e.target.value = '';
     });
@@ -37,13 +37,13 @@ document.addEventListener('click', async function(e) {
 
     if (e.target.id === 'file-download') {
         const key = document.getElementById('keyInput').value;
-        const download = await import('./download.js');
+        const download = await import('/schem/assets/download.js');
         download.handleDownload(key);
     }
 
     if (e.target.id === 'file-delete') {
         const key = document.getElementById('keyInput').value;
-        const deleteJs = await import('./delete.js');
+        const deleteJs = await import('/schem/assets/delete.js');
         deleteJs.handleDelete(key);
     }
     
