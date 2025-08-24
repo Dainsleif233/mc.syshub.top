@@ -42,10 +42,9 @@ export async function handleFile(file) {
         });
         
         xhr.addEventListener('error', () => {
-            throw {
-                status: -1,
-                responseText: '{"error":"网络错误"}'
-            };
+            errorText.innerText = '网络错误';
+            fileUploading.classList.add('hidden');
+            fileFailed.classList.remove('hidden');
         });
         
         // 开始上传
